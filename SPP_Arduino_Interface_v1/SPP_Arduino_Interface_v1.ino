@@ -3,7 +3,9 @@ LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 int packetsRecieved = 0, i,shapeCounter = 1;
 char recieved;
 unsigned char tempX, tempY;
-
+String intData = "";
+char intBuffer[4];
+int intLength;
 
 struct Node{
   unsigned char xCoord;
@@ -51,75 +53,75 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Ready");
   lcd.setCursor(0, 1);
-
-  
   
 }
 
 void loop() {
-  
-/*if (Serial.available() > 0) { 
-  recieved = Serial.read();
-  
-  if(recieved == '!' || recieved == '\n'){
-    printPackNumber(packetsRecieved);
-    packetsRecieved++;
-    clearLine(1);
-    lcd.setCursor(0, 1);
-    //Serial.print("Cleared line, ready for packet# %d \n",packetsRecieved);
-  }else{
-  lcd.print(recieved);
-    //Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
-  }
-}*/
-
-  // Some initialization 
-  //currShape->next = (shapeList *) malloc (sizeof(shapeList));
-  //currShape = currShape->next;
-  //currShape->coords = (Node *) malloc (sizeof(Node));
-  //currCoord = currShape->coords;
-
 while (1==1){
   // Recieving data from serial, will run until broken
   
   if (Serial.available() > 0){
     // Store the recieved char and operate on it later
     recieved = Serial.read();
-    
-    /*
-    // Debug LCD Print
-    if(recieved == '!' || recieved == '\n'){
-    printPackNumber(packetsRecieved);
-    packetsRecieved++;
-    clearLine(1);
-    lcd.setCursor(0, 1);
-    //Serial.print("Cleared line, ready for packet# %d \n",packetsRecieved);
-  }else{
-  lcd.print(recieved);
-    //Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
-  }
-  */
   
    if (recieved == '('){
+     // Recieved starting bracket, will treat following as numbers until ','
+     while(1==1){
+       Serial.print("F  ");
+       if (Serial.available() > 0){
+          Serial.print("f  ");
+         recieved = Serial.read();
+         
+         if (recieved == ','){
+           break;
+         } else {
+           intData += recieved;
+         }
+       }
+       Serial.println(intData);
+     }
+     
+     // All digits obtained, convert to short
+     Serial.println(intData);
+     
+     intLength = intData.length() + 1;
+     intData.toCharArray(intBuffer, intLength);
+     intData = "";
+     currCoord -> xCoord = (unsigned char) atoi(intBuffer);
+     
+     // Recieved seperator, will now take y coord
+     while(1==1){
+       Serial.println("S  ");
+       if (Serial.available() > 0){
+         Serial.println("s  ");
+         recieved = Serial.read();
+         
+         if (recieved == ')'){
+           break;
+         } else {
+           intData += (char) recieved;
+         }
+       }
+       Serial.println(intData);
+     }
+     // All digits obtained, convert to short
+     Serial.println(intData);
+     intLength = intData.length() + 1;
+     Serial.println("yo");
+     intData.toCharArray(intBuffer, intLength);
+     intData = "";
+     currCoord -> yCoord = (unsigned char) atoi(intBuffer);
     
-    // Recieved a starting round bracket, indicating start of a corrdinate
-    tempX = (unsigned char) Serial.parseInt();
-    tempY = (unsigned char) Serial.parseInt();
-    
+    /*
+    // LCD debug output
     lcd.setCursor(0,0);
     lcd.print("+ Parsed ints +");
     
     lcd.setCursor(0,1);
-    lcd.print(tempX);
+    lcd.print( currCoord -> xCoord);
     lcd.print(" ");
-    lcd.println(tempY);
-    
-   // Serial.print("SaveOP1 ");
-    
-    currCoord -> xCoord = tempX;
-    
-    currCoord -> yCoord = tempY;
-    
+    lcd.println( currCoord -> yCoord);
+    */
     currCoord -> next = (struct Node*) malloc (sizeof(struct Node));
 
    
