@@ -37,7 +37,6 @@ void loop() {
   
 if (Serial.available() > 0) { 
   recieved = Serial.read();
-  
   if(recieved == '!' || recieved == '\n'){
     printPackNumber(packetsRecieved);
     packetsRecieved++;
