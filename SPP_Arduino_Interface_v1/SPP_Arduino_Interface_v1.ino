@@ -2,23 +2,19 @@
 LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 int packetsRecieved = 0, i,shapeCounter = 1;
 char recieved;
-int tempX, tempY;
+unsigned char tempX, tempY;
 
 
-
-typedef struct Node{
+struct Node{
   unsigned char xCoord;
   unsigned char yCoord;
-  Node * next;
-  
-}Node;
+  struct Node * next = NULL;
+};
 
-
-typedef struct shapeList{
-   Node * coords;
-   shapeList * next;
-   
-}shapeList;
+struct shapeList{
+   Node * coords = NULL;
+   struct shapeList * next = NULL;
+};
 
 
 int clearLine(int a){
@@ -35,24 +31,25 @@ int printPackNumber(int PR){
 }
 
 // shapes remain static as the start of the list, currShape will follow the progress
-shapeList * shapes = (shapeList *) malloc (sizeof(shapeList));
-shapeList * currShape = shapes;
-Node * currCoord = NULL;
+struct shapeList * shapes = (shapeList *) malloc (sizeof(shapeList));
+struct shapeList * currShape = shapes;
+struct Node * currCoord = NULL;
+
+struct Node * tempCoord;
+struct shapeList * tempShape;
 
 
 void setup() {
+  
   Serial.begin(9600);
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   // Print a message to the LCD.
-  lcd.print("hello, world!");
+  lcd.print("Setup Reset");
   delay(1000);
   clearLine(0);
   lcd.setCursor(0, 0);
-  lcd.print("Packet#:");
-  printPackNumber(packetsRecieved);
-  packetsRecieved++;
-  clearLine(1);
+  lcd.print("Ready");
   lcd.setCursor(0, 1);
 
   
@@ -76,6 +73,12 @@ void loop() {
   }
 }*/
 
+  // Some initialization 
+  //currShape->next = (shapeList *) malloc (sizeof(shapeList));
+  //currShape = currShape->next;
+  //currShape->coords = (Node *) malloc (sizeof(Node));
+  //currCoord = currShape->coords;
+
 while (1==1){
   // Recieving data from serial, will run until broken
   
@@ -83,6 +86,7 @@ while (1==1){
     // Store the recieved char and operate on it later
     recieved = Serial.read();
     
+    /*
     // Debug LCD Print
     if(recieved == '!' || recieved == '\n'){
     printPackNumber(packetsRecieved);
@@ -94,8 +98,42 @@ while (1==1){
   lcd.print(recieved);
     //Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
   }
+  */
   
-  
+   if (recieved == '('){
+    
+    // Recieved a starting round bracket, indicating start of a corrdinate
+    tempX = (unsigned char) Serial.parseInt();
+    tempY = (unsigned char) Serial.parseInt();
+    
+    lcd.setCursor(0,0);
+    lcd.print("+ Parsed ints +");
+    
+    lcd.setCursor(0,1);
+    lcd.print(tempX);
+    lcd.print(" ");
+    lcd.println(tempY);
+    
+   // Serial.print("SaveOP1 ");
+    
+    currCoord -> xCoord = tempX;
+    
+    currCoord -> yCoord = tempY;
+    
+    currCoord -> next = (struct Node*) malloc (sizeof(struct Node));
+
+   
+    Serial.print(currCoord -> xCoord);
+    Serial.print(" ");
+    Serial.println(currCoord -> yCoord);
+        
+    currCoord = currCoord -> next;
+    Serial.println("D");
+    
+    //lcd.clear();
+    //lcd.setCursor(0,1);
+    //lcd.print("test");
+  }else{
   
   if (recieved == '!'){
     // Recieved the global end character, will wrap up
@@ -107,28 +145,25 @@ while (1==1){
   
   if (recieved == '\n'){
     // Recieved linefeed character, indicating the start of another shape
+    Serial.println("S");
     currCoord->next = NULL; //sort of clean up the tail
     
-    currShape->next = (shapeList *) malloc (sizeof(shapeList));
+    currShape->next = (struct shapeList *) malloc (sizeof(struct shapeList));
     currShape = currShape->next;
-    currShape->coords = (Node *) malloc (sizeof(Node));
+    currShape->coords = (struct Node *) malloc (sizeof(struct Node));
     currCoord = currShape->coords;
-  }
-  
-  if (recieved == '('){
-    // Recieved a starting round bracket, indicating start of a corrdinate
-    tempX = (unsigned char) Serial.parseInt();
-    tempY = (unsigned char) Serial.parseInt();
     
-    currCoord -> xCoord = tempX;
-    currCoord -> yCoord = tempY;
-    currCoord -> next = (Node*) malloc (sizeof(Node));
-    currCoord = currCoord -> next;
+    Serial.println("SD");
   }
   
   
    }
   }
+}
+  
+  Serial.println("Hellos");
+  
+  
   
   // Recieve loop terminated, will recall stored data and print over serial
   currShape = shapes;
@@ -136,17 +171,37 @@ while (1==1){
   
   while (currShape != NULL){
     // Print a header of the surrent shape
-    Serial.print('-------- Shape #: %d ---------- \n',shapeCounter);
+    Serial.print("\n-------- Shape #: ");
+    Serial.print(shapeCounter,DEC);
+    Serial.print(" ---------- \n");
     
     while (currCoord->next != NULL){
-      Serial.print('(%u',currCoord->xCoord);
-      Serial.print(',%u) ',currCoord->yCoord);
+      Serial.print("(");
+      Serial.print(currCoord->xCoord);
+      Serial.print(",");
+      Serial.print(currCoord->yCoord);
+      Serial.print(")");
+      
+      Serial.println("Move to next 1");
+      tempCoord = currCoord;
       currCoord = currCoord -> next;
+      free(tempCoord);
+      
+      Serial.println("Move to next 2");
     }
     
+    Serial.println("Move Shape 1");
+    tempShape = currShape;
     currShape = currShape -> next;
+    free(currShape);
     shapeCounter++;
-  } 
+    Serial.println("Move Shape 2");
+  }
+  
+  Serial.println("Done");
+  while(1==1){
+    delay(10000);
+  }
   
 
 }
