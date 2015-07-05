@@ -7,11 +7,15 @@ typedef struct{
   int xCoord;
   int yCoord;
   Node * next;
+  
 }Node;
 
+
 typedef struct{
-   Node coords
-}
+   Node coords;
+   shapeList * next:
+   
+}shapeList;
 
 
 int clearLine(int a){
@@ -42,6 +46,11 @@ void setup() {
   packetsRecieved++;
   clearLine(1);
   lcd.setCursor(0, 1);
+  
+  shapeList * shapes = (shapeList *) malloc (sizeof(shapeList));
+  
+  
+  
 }
 
 void loop() {
@@ -54,24 +63,14 @@ void loop() {
     packetsRecieved++;
     clearLine(1);
     lcd.setCursor(0, 1);
-    Serial.print("Cleared line, ready for packet# %d \n",packetsRecieved);
+    //Serial.print("Cleared line, ready for packet# %d \n",packetsRecieved);
   }else{
   lcd.print(recieved);
-    Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
+    //Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
   }
 }*/
 
 if (Serial.available() > 0){
-   recieved = Serial.read();
-   
-   if (recieved == '!' || recieved == '\n'){
-   
-   
-   
-}
 
-  
-  
-  
-  
+
 }

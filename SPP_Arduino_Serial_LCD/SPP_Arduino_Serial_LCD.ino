@@ -3,17 +3,6 @@ LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 int packetsRecieved = 0, i;
 char recieved;
 
-typedef struct{
-  int xCoord;
-  int yCoord;
-  Node * next;
-}Node;
-
-typedef struct{
-   Node coords
-}
-
-
 int clearLine(int a){
   lcd.setCursor(0, a);
   
@@ -46,7 +35,7 @@ void setup() {
 
 void loop() {
   
-/*if (Serial.available() > 0) { 
+if (Serial.available() > 0) { 
   recieved = Serial.read();
   
   if(recieved == '!' || recieved == '\n'){
@@ -54,24 +43,10 @@ void loop() {
     packetsRecieved++;
     clearLine(1);
     lcd.setCursor(0, 1);
-    Serial.print("Cleared line, ready for packet# %d \n",packetsRecieved);
+    //Serial.print("Cleared line, ready for packet# %d \n",(int)packetsRecieved);
   }else{
   lcd.print(recieved);
-    Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
+    //Serial.print("Recieved data %c, part of packet %d",packetsRecieved);
   }
-}*/
-
-if (Serial.available() > 0){
-   recieved = Serial.read();
-   
-   if (recieved == '!' || recieved == '\n'){
-   
-   
-   
-}
-
-  
-  
-  
-  
+ }
 }
