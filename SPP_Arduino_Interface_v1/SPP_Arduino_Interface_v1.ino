@@ -2,20 +2,20 @@
 LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 int packetsRecieved = 0, i,shapeCounter = 1;
 char recieved;
-unsigned char tempX, tempY;
+int tempX, tempY;
 String intData = "";
 char intBuffer[4];
 int intLength;
 
 struct Node{
-  unsigned char xCoord;
-  unsigned char yCoord;
-  struct Node * next = NULL;
+  int xCoord;
+  int yCoord;
+  struct Node * next;
 };
 
 struct shapeList{
-   Node * coords = NULL;
-   struct shapeList * next = NULL;
+   Node * coords;
+   struct shapeList * next;
 };
 
 
@@ -65,12 +65,13 @@ while (1==1){
     recieved = Serial.read();
   
    if (recieved == '('){
+ 
      // Recieved starting bracket, will treat following as numbers until ','
      while(1==1){
        Serial.print("F  ");
        if (Serial.available() > 0){
           Serial.print("f  ");
-         recieved = Serial.read();
+         recieved = (char) Serial.read();
          
          if (recieved == ','){
            break;
@@ -87,13 +88,15 @@ while (1==1){
      intLength = intData.length() + 1;
      intData.toCharArray(intBuffer, intLength);
      intData = "";
-     currCoord -> xCoord = (unsigned char) atoi(intBuffer);
+     currCoord -> xCoord = atoi(intBuffer);
+     // Serial.println(intBuffer);
+     for( i = 0; i < sizeof(intBuffer);  ++i ) intBuffer[i] = (char)0;
      
      // Recieved seperator, will now take y coord
      while(1==1){
        Serial.println("S  ");
        if (Serial.available() > 0){
-         Serial.println("s  ");
+         Serial.print("s  ");
          recieved = Serial.read();
          
          if (recieved == ')'){
@@ -104,15 +107,17 @@ while (1==1){
        }
        Serial.println(intData);
      }
+     
      // All digits obtained, convert to short
      Serial.println(intData);
      intLength = intData.length() + 1;
      Serial.println("yo");
      intData.toCharArray(intBuffer, intLength);
      intData = "";
-     currCoord -> yCoord = (unsigned char) atoi(intBuffer);
+     currCoord -> yCoord = atoi(intBuffer);
+     // Serial.println(intBuffer);
+     for( i = 0; i < sizeof(intBuffer);  ++i ) intBuffer[i] = (char)0;
     
-    /*
     // LCD debug output
     lcd.setCursor(0,0);
     lcd.print("+ Parsed ints +");
@@ -120,8 +125,9 @@ while (1==1){
     lcd.setCursor(0,1);
     lcd.print( currCoord -> xCoord);
     lcd.print(" ");
-    lcd.println( currCoord -> yCoord);
-    */
+    lcd.print( currCoord -> yCoord);
+
+
     currCoord -> next = (struct Node*) malloc (sizeof(struct Node));
 
    
