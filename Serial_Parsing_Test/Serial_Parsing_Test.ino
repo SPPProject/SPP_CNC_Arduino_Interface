@@ -13,7 +13,7 @@ int clearLine(int a){
 
 void setup()
 {
-  Serial.begin(4800);
+  Serial.begin(9600);
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   // Print a message to the LCD.

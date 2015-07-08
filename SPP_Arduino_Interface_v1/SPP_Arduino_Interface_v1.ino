@@ -43,7 +43,7 @@ struct shapeList * tempShape;
 
 void setup() {
   
-  Serial.begin(9600);
+  Serial.begin(4800);
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   // Print a message to the LCD.
@@ -65,61 +65,11 @@ while (1==1){
     recieved = Serial.read();
   
    if (recieved == '('){
- 
-     // Recieved starting bracket, will treat following as numbers until ','
-     while(1==1){
-       Serial.print("F  ");
-       if (Serial.available() > 0){
-          Serial.print("f  ");
-         recieved = (char) Serial.read();
-         
-         if (recieved == ','){
-           break;
-         } else {
-           intData += recieved;
-         }
-       }
-       Serial.println(intData);
-     }
+     currCoord -> xCoord = Serial.parseInt();
+     currCoord -> yCoord = Serial.parseInt();
      
-     // All digits obtained, convert to short
-     Serial.println(intData);
-     
-     intLength = intData.length() + 1;
-     intData.toCharArray(intBuffer, intLength);
-     intData = "";
-     currCoord -> xCoord = atoi(intBuffer);
-     // Serial.println(intBuffer);
-     for( i = 0; i < sizeof(intBuffer);  ++i ) intBuffer[i] = (char)0;
-     
-     // Recieved seperator, will now take y coord
-     while(1==1){
-       Serial.println("S  ");
-       if (Serial.available() > 0){
-         Serial.print("s  ");
-         recieved = Serial.read();
-         
-         if (recieved == ')'){
-           break;
-         } else {
-           intData += (char) recieved;
-         }
-       }
-       Serial.println(intData);
-     }
-     
-     // All digits obtained, convert to short
-     Serial.println(intData);
-     intLength = intData.length() + 1;
-     Serial.println("yo");
-     intData.toCharArray(intBuffer, intLength);
-     intData = "";
-     currCoord -> yCoord = atoi(intBuffer);
-     // Serial.println(intBuffer);
-     for( i = 0; i < sizeof(intBuffer);  ++i ) intBuffer[i] = (char)0;
-    
     // LCD debug output
-    lcd.setCursor(0,0);
+    clearLine(1);
     lcd.print("+ Parsed ints +");
     
     lcd.setCursor(0,1);
@@ -128,13 +78,8 @@ while (1==1){
     lcd.print( currCoord -> yCoord);
 
 
-    currCoord -> next = (struct Node*) malloc (sizeof(struct Node));
+    currCoord -> next = (struct Node *) malloc (sizeof(struct Node));
 
-   
-    Serial.print(currCoord -> xCoord);
-    Serial.print(" ");
-    Serial.println(currCoord -> yCoord);
-        
     currCoord = currCoord -> next;
     Serial.println("D");
     
@@ -161,7 +106,7 @@ while (1==1){
     currShape->coords = (struct Node *) malloc (sizeof(struct Node));
     currCoord = currShape->coords;
     
-    Serial.println("SD");
+    Serial.println("GH");
   }
   
   
@@ -183,7 +128,7 @@ while (1==1){
     Serial.print(shapeCounter,DEC);
     Serial.print(" ---------- \n");
     
-    while (currCoord->next != NULL){
+    while (currCoord != NULL){
       Serial.print("(");
       Serial.print(currCoord->xCoord);
       Serial.print(",");
