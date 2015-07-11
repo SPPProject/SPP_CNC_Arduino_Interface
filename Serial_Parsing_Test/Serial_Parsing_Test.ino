@@ -1,9 +1,16 @@
+#include <SPI.h>
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
+LiquidCrystal lcd(10); //SPI MODE ##########
+//LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 
+// Global Variable Decleartions
 int charCount = 0;
 int testNumber, testNumberConfirm;
+int testTemp;
+int successCount;
+int trialCount = 0;
 
+// Function Declearations
 int clearLine(int a){
   lcd.setCursor(0, a);
   lcd.print("                 ");
@@ -11,9 +18,19 @@ int clearLine(int a){
 }
 
 
+
+
 void setup()
 {
-  Serial.begin(9600);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
+  pinMode(5, INPUT_PULLUP);
+  pinMode(6, INPUT_PULLUP);
+  pinMode(7, INPUT_PULLUP);
+  
+  digitalWrite(3, HIGH);
+  Serial.begin(4800);
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   // Print a message to the LCD.
@@ -53,7 +70,7 @@ void setup()
     
     if (testNumber == testNumberConfirm){
       clearLine(0);
-      lcd.print("Confirmed, standby");
+      lcd.print("Confirmed");
       delay(500);
       Serial.println("Number confirmed, proceed");
       break;
@@ -70,11 +87,6 @@ void setup()
   clearLine(0);
   lcd.print("Ready for serial");
 }
-
-int testTemp;
-int successCount;
-int trialCount = 0;
-
 void loop()
 {
   successCount = 0;

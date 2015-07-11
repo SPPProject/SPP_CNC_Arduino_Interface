@@ -1,5 +1,6 @@
+#include <SPI.h>
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
+LiquidCrystal lcd(10);
 
 int clearLine(int a){
   lcd.setCursor(0, a);
