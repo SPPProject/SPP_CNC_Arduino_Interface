@@ -3,6 +3,19 @@
 //LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
 LiquidCrystal lcd(10); //SPI MODE ##########
 
+
+// Pin Declearation
+byte UP_BUTTON = 9;
+byte DOWN_BUTTON = 8;
+
+byte STEPPER_YEL = 4;
+byte STEPPER_BLU = 5;
+byte STEPPER_GRE = 6;
+byte STEPPER_RED = 7;
+
+// Stepper Property Definition
+byte STEPS = 200; // 1.8 degrees per step
+
 // Global Variable Declearations
 int packetsRecieved = 0, i,shapeCounter = 1;
 char recieved;
@@ -23,12 +36,6 @@ struct shapeList{
      struct shapeList * next;
 };
 
-struct shapeList * shapes = (shapeList *) malloc (sizeof(shapeList));
-struct shapeList * currShape = shapes;
-struct Node * currCoord = NULL;
-
-struct Node * tempCoord;
-struct shapeList * tempShape;
 
 // Assist function declearations
 int clearLine(int a){
@@ -44,18 +51,18 @@ int printPackNumber(int PR){
     lcd.print(PR);
 }
 
+// Setup Decleartaions
+struct shapeList * shapeListStart;
+struct shapeList * currShape;
+struct Node * currCoord;
+
+struct Node * tempCoord;
+struct shapeList * tempShape;
 
 // Setup function
 void setup() {
     
-    pinMode(2, INPUT_PULLUP);
-    pinMode(3, INPUT_PULLUP);
-    pinMode(4, INPUT_PULLUP);
-    pinMode(5, INPUT_PULLUP);
-    pinMode(6, INPUT_PULLUP);
-    pinMode(7, INPUT_PULLUP);
-    
-    Serial.begin(4800);
+    Serial.begin(9600);
     // set up the LCD's number of columns and rows: 
     lcd.begin(16, 2);
     // Print a message to the LCD.
@@ -65,6 +72,38 @@ void setup() {
     lcd.setCursor(0, 0);
     lcd.print("Ready");
     lcd.setCursor(0, 1);
+
+    // Test stuff, sizes of things
+    Serial.println("Sizes of things:");
+    Serial.print("Size of int:");
+    Serial.println(sizeof(int));
+    Serial.print("Size of Node:");
+    Serial.println(sizeof(struct Node));
+    Serial.print("Size of shapeList:");
+    Serial.println(sizeof(struct shapeList));
+    Serial.print("Size of Node pointer:");
+    Serial.println(sizeof(struct Node *));
+    Serial.print("Size of shapeList pointer:");
+    Serial.println(sizeof(struct shapeList *));
+
+    // Initialize structs and pointers
+    shapeListStart = (struct shapeList *) malloc (sizeof(struct shapeList));
+    currShape = shapeListStart;
+    shapeListStart -> coords = (struct Node *) malloc (sizeof(struct Node));
+    currCoord = shapeListStart -> coords;
+
+    Serial.print("CLS:");
+    Serial.println((long)shapeListStart);
+
+    Serial.print("CS:");
+    Serial.println((long)currShape);
+
+    Serial.print("CC:");
+    Serial.println((long)currCoord);
+    
+    Serial.println("-------- Init Done ----------");
+
+
 }
 
 // Main event loop (ish)
@@ -92,9 +131,12 @@ while (1==1){
 
 
         currCoord -> next = (struct Node *) malloc (sizeof(struct Node));
+        Serial.print("CCN:");
+        Serial.println((long)currCoord -> next);
 
+        tempCoord = currCoord;
         currCoord = currCoord -> next;
-        Serial.println("D");
+        //Serial.println("D");
         
         //lcd.clear();
         //lcd.setCursor(0,1);
@@ -112,14 +154,27 @@ while (1==1){
     if (recieved == '\n'){
         // Recieved linefeed character, indicating the start of another shape
         Serial.println("S");
-        currCoord->next = NULL; //sort of clean up the tail
+        free(currCoord);
+        tempCoord->next = NULL; //clean up the tail
         
         currShape->next = (struct shapeList *) malloc (sizeof(struct shapeList));
+        Serial.print("CSN:");
+        Serial.println((long)currShape -> next);
+        tempShape = currShape;
         currShape = currShape->next;
         currShape->coords = (struct Node *) malloc (sizeof(struct Node));
         currCoord = currShape->coords;
         
-        Serial.println("GH");
+        Serial.print("CLS:");
+        Serial.println((long)shapeListStart);
+
+        Serial.print("CS:");
+        Serial.println((long)currShape);
+
+        Serial.print("CC:");
+        Serial.println((long)currCoord);
+
+        Serial.println("-------- Shape Done ----------");
     }
     
     
@@ -127,41 +182,48 @@ while (1==1){
     }
 }
     
-    Serial.println("Hellos");
+
+    Serial.println("-------- Start output --------");
     
     
     
     // Recieve loop terminated, will recall stored data and print over serial
-    currShape = shapes;
-    currCoord = currShape->coords;
+    currShape = shapeListStart;
+    currCoord = shapeListStart->coords;
+    Serial.print("CS:");
+    Serial.println((long)currShape);
+    Serial.print("CC:");
+    Serial.println((long)currCoord);
     
     while (currShape != NULL){
         // Print a header of the surrent shape
         Serial.print("\n-------- Shape #: ");
         Serial.print(shapeCounter,DEC);
         Serial.print(" ---------- \n");
+        Serial.print("CS:");
+        Serial.println((long)currShape);
         
         while (currCoord != NULL){
+            Serial.print("CC:");
+            Serial.print((long)currCoord);
             Serial.print("(");
             Serial.print(currCoord->xCoord);
             Serial.print(",");
             Serial.print(currCoord->yCoord);
-            Serial.print(")");
+            Serial.println(")");
             
-            Serial.println("Move to next 1");
             tempCoord = currCoord;
             currCoord = currCoord -> next;
             free(tempCoord);
             
-            Serial.println("Move to next 2");
         }
         
-        Serial.println("Move Shape 1");
         tempShape = currShape;
         currShape = currShape -> next;
-        free(currShape);
         shapeCounter++;
-        Serial.println("Move Shape 2");
+        currCoord = currShape -> coords;
+        Serial.print("CC - LOOP:");
+        Serial.println((long)currCoord);
     }
     
     Serial.println("Done");
