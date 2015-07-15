@@ -21,29 +21,29 @@ byte STEPPER_RED_X = 7;
 
 // Stepper Property Definition
 byte STEPS = 200; // 1.8 degrees per step
-byte STEPPER_RPM = 100; // RPM the stepper runs on (150 is about the maximum)
-byte UNIT_DISTANCE_X = 5; // Number of steps per one unit distance, X axis
-byte UNIT_DISTANCE_Y = 5; // Number of steps per one unit distance, Y axis
+byte STEPPER_RPM = 50; // RPM the stepper runs on (150 is about the maximum)
+byte UNIT_DISTANCE_X = 100; // Number of steps per one unit distance, X axis
+byte UNIT_DISTANCE_Y = 100; // Number of steps per one unit distance, Y axis
 
-Stepper stepperX = stepper(STEPS, STEPPER_YEL, STEPPER_BLU, STEPPER_GRE, STEPPER_RED);
-Stepper stepperY = stepper(STEPS, STEPPER_YEL, STEPPER_BLU, STEPPER_GRE, STEPPER_RED);
+Stepper stepperX = Stepper(STEPS, STEPPER_YEL_X, STEPPER_BLU_X, STEPPER_GRE_X, STEPPER_RED_X);
+// Stepper stepperY = stepper(STEPS, STEPPER_YEL_Y, STEPPER_BLU_Y, STEPPER_GRE_Y, STEPPER_RED_Y);
 
 // Global Variable Declearations
 int packetsRecieved = 0, i,shapeCounter = 1;
 char recieved;
-int tempX, tempY;
+float tempX, tempY;
 String intData = "";
 char intBuffer[4];
 int intLength;
 
 char operationMode;
-int stepper_LastX;
-int stepper_LastY;
+float stepper_LastX;
+float stepper_LastY;
 
 // Data structor declearations
 struct Node{
-    int xCoord;
-    int yCoord;
+    float xCoord;
+    float yCoord;
     struct Node * next;
 };
 
@@ -71,14 +71,14 @@ int stepperMoveTo(int posX, int posY){
     // only simple step commands for now, will have to impliment stall detection once hardware allows
 
     // Move X
-    stepper.step((posX - stepper_LastX)*UNIT_DISTANCE_X);
+    stepperX.step((posX - stepper_LastX)*UNIT_DISTANCE_X);
     // Update last position
     stepper_LastX = posX;
 
     // Move Y
-    stepper.step((posY - stepper_LastY)*UNIT_DISTANCE_Y);
+    // stepperX.step((posY - stepper_LastY)*UNIT_DISTANCE_Y);
     // Update last position
-    stepper_LastY = posY;
+    // stepper_LastY = posY;
 
 
     // Will also have to impliment Z actions 
@@ -97,7 +97,7 @@ struct shapeList * tempShape;
 // Setup function
 void setup() {
     
-    Serial.begin(9600);
+    Serial.begin(4800);
     // set up the LCD's number of columns and rows: 
     lcd.begin(16, 2);
     // Print a message to the LCD.
@@ -150,9 +150,9 @@ void loop() {
             // Store the recieved char and operate on it later
             recieved = Serial.read();
         
-         if (recieved == '('){
-             currCoord -> xCoord = Serial.parseInt();
-             currCoord -> yCoord = Serial.parseInt();
+         if (recieved == 'X'){
+             currCoord -> xCoord = Serial.parseFloat();
+             currCoord -> yCoord = Serial.parseFloat();
              
             // LCD debug output
             clearLine(1);
@@ -216,14 +216,14 @@ void loop() {
         }
     } // End RX loop
 
-    Serial.println("Input 's' to execute the path with steppers, 'p' to print storage through serial,")
+    Serial.println("Input 's' to execute the path with steppers, 'p' to print storage through serial,");
     Serial.println(" 'r' go back and listen to serial, 'c' to clear memory and listen to serial.");
     clearLine(1);
     lcd.print("Input, See serial");
 
-    while(1==1){ // Wait for user input on operatoin to perfrom with data recieved
-        if(Serial.avaliable() > 0){
-            recieved = serial.read();
+   /* while(1==1){ // Wait for user input on operatoin to perfrom with data recieved
+        if(Serial.available() > 0){
+            recieved = Serial.read();
             if(recieved == 's' || recieved == 'S'){
                 operationMode = 1;
                 Serial.println("Selected, will operate stepper.");
@@ -251,40 +251,43 @@ void loop() {
             } else {
                 Serial.println("Input recieved, but not understood, try again.");
                 clearLine(1);
-                lcd.print("Retry input")
+                lcd.print("Retry input");
             }
         }
-    }
+    }*/
+
+    operationMode = 1;
 
     if (operationMode == 1){ // Operation 1, Run steppers
-        Serial.println("-------- Actuate Stepper --------");
+        //Serial.println("-------- Actuate Stepper --------");
+        delay(100);
         
         // Recieve loop terminated, will recall stored data and print over serial
         currShape = shapeListStart;
         currCoord = shapeListStart->coords;
-        Serial.print("CS:");
-        Serial.println((long)currShape);
-        Serial.print("CC:");
-        Serial.println((long)currCoord);
+        //Serial.print("CS:");
+        //Serial.println((long)currShape);
+        //Serial.print("CC:");
+        //Serial.println((long)currCoord);
         
         while (currShape != NULL){
             // Print a header of the surrent shape
-            Serial.print("\n-------- Shape #: ");
-            Serial.print(shapeCounter,DEC);
-            Serial.print(" ---------- \n");
-            Serial.print("CS:");
-            Serial.println((long)currShape);
+            //Serial.print("\n-------- Shape #: ");
+            //Serial.print(shapeCounter,DEC);
+            //Serial.print(" ---------- \n");
+            //Serial.print("CS:");
+            //Serial.println((long)currShape);
             
             while (currCoord != NULL){
-                Serial.print("CC:");
-                Serial.print((long)currCoord);
-                Serial.print("(");
-                Serial.print(currCoord->xCoord);
-                Serial.print(",");
-                Serial.print(currCoord->yCoord);
-                Serial.print(")");
+                //Serial.print("CC:");
+                //Serial.print((long)currCoord);
+                //Serial.print("(");
+                //Serial.print(currCoord->xCoord);
+                //Serial.print(",");
+                //Serial.print(currCoord->yCoord);
+                //Serial.print(")");
                 stepperMoveTo(currCoord->xCoord,currCoord->yCoord);
-                Serial.println("Moved.");
+                //Serial.println("Moved.");
                 
                 tempCoord = currCoord;
                 currCoord = currCoord -> next;
@@ -300,14 +303,13 @@ void loop() {
             currShape = currShape -> next;
             shapeCounter++;
             currCoord = currShape -> coords;
-            Serial.print("CC - LOOP:");
-            Serial.println((long)currCoord);
+            //Serial.print("CC - LOOP:");
+            //Serial.println((long)currCoord);
         }
         
-        Serial.println("Done");
+        //Serial.println("Done");
     }
-    }
-
+  
     if (operationMode == 2){ // Operation 2, Print memory
 
         Serial.println("-------- Print Memory Content --------");
