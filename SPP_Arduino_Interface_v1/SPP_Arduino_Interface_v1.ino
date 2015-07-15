@@ -67,7 +67,7 @@ int printPackNumber(int PR){
     lcd.print(PR);
 }
 
-int stepperMoveTo(posX, posY){
+int stepperMoveTo(int posX, int posY){
     // only simple step commands for now, will have to impliment stall detection once hardware allows
 
     // Move X
