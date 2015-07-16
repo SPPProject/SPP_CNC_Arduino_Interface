@@ -1,23 +1,23 @@
-#include <SPI.h>
-#include <LiquidCrystal.h>
+// #include <SPI.h>
+// #include <LiquidCrystal.h>
 #include <Stepper.h>
-//LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
-LiquidCrystal lcd(10); //SPI MODE ##########
+// LiquidCrystal lcd(11,12,2,3,4,5,6,7,8,9);
+// LiquidCrystal lcd(10); //SPI MODE ##########
 
 
 // Pin Declearation
 byte UP_BUTTON = 9;
 byte DOWN_BUTTON = 8;
 
-byte STEPPER_YEL_X = 4;
-byte STEPPER_BLU_X = 5;
-byte STEPPER_GRE_X = 6;
-byte STEPPER_RED_X = 7;
+byte STEPPER_1_X = 4;
+byte STEPPER_2_X = 5;
+byte STEPPER_3_X = 6;
+byte STEPPER_4_X = 7;
 
-// byte STEPPER_YEL_Y = ;
-// byte STEPPER_BLU_Y = ;
-// byte STEPPER_GRE_Y = ;
-// byte STEPPER_RED_Y = ;
+byte STEPPER_1_Y = 8;
+byte STEPPER_2_Y = 9;
+byte STEPPER_3_Y = 10;
+byte STEPPER_4_Y = 11;
 
 // Stepper Property Definition
 byte STEPS = 200; // 1.8 degrees per step
@@ -25,8 +25,8 @@ byte STEPPER_RPM = 100; // RPM the stepper runs on (150 is about the maximum)
 byte UNIT_DISTANCE_X = 10; // Number of steps per one unit distance, X axis
 byte UNIT_DISTANCE_Y = 10; // Number of steps per one unit distance, Y axis
 
-Stepper stepperX = Stepper(STEPS, STEPPER_YEL_X, STEPPER_BLU_X, STEPPER_GRE_X, STEPPER_RED_X);
-// Stepper stepperY = stepper(STEPS, STEPPER_YEL_Y, STEPPER_BLU_Y, STEPPER_GRE_Y, STEPPER_RED_Y);
+Stepper stepperX = Stepper(STEPS, STEPPER_1_X, STEPPER_2_X, STEPPER_3_X, STEPPER_4_X);
+Stepper stepperY = Stepper(STEPS, STEPPER_1_Y, STEPPER_2_Y, STEPPER_3_Y, STEPPER_4_Y);
 
 // Global Variable Declearations
 int packetsRecieved = 0, i,shapeCounter = 1;
@@ -54,33 +54,54 @@ struct shapeList{
 
 
 // Assist function declearations
-int clearLine(int a){
+/*int clearLine(int a){
     lcd.setCursor(0, a);
     
     for (i=1;i<17;i++){
         lcd.print(" ");
     }
-}
+}*/
 
 int printPackNumber(int PR){
-    lcd.setCursor(9, 0);
-    lcd.print(PR);
+    // lcd.setCursor(9, 0);
+    // lcd.print(PR);
 }
 
 void stepperMoveTo(float posX, float posY){
     // only simple step commands for now, will have to impliment stall detection once hardware allows
+    
+    // First calculate the total number of steps required for all directions
+    int displacmentX = ((posX - stepper_LastX)*UNIT_DISTANCE_X);
+    int displacmentY = ((posY - stepper_LastY)*UNIT_DISTANCE_Y);
 
+    int subStepX;
+    int subStepY;
+    
+    Serial.print("MoveX: ");
+    Serial.print(displacmentX);
+    Serial.print("    MoveY: ");
+    Serial.print(displacmentY);
+
+    while(1 == 1){
+      if (abs(displacmentX) > abs(displacmentY))
+      
+    }
+
+    /*
     // Move X
     Serial.print("MoveX: ");
     Serial.println((posX - stepper_LastX)*UNIT_DISTANCE_X);
     stepperX.step((posX - stepper_LastX)*UNIT_DISTANCE_X);
-    // Update last position
-    stepper_LastX = posX;
 
     // Move Y
-    // stepperX.step((posY - stepper_LastY)*UNIT_DISTANCE_Y);
+    Serial.print("MoveY: ");
+    Serial.println((posY - stepper_LastY)*UNIT_DISTANCE_Y);
+    stepperY.step((posY - stepper_LastY)*UNIT_DISTANCE_Y);
+    */
+    
     // Update last position
-    // stepper_LastY = posY;
+    stepper_LastX = posX;
+    stepper_LastY = posY;
 
 
     // Will also have to impliment Z actions 
@@ -101,16 +122,16 @@ void setup() {
     
     Serial.begin(4800);
     // set up the LCD's number of columns and rows: 
-    lcd.begin(16, 2);
+    // lcd.begin(16, 2);
     // Print a message to the LCD.
-    lcd.print("Setup Reset");
-    delay(1000);
-    clearLine(0);
-    lcd.setCursor(0, 0);
-    lcd.print("Ready");
-    lcd.setCursor(0, 1);
+    // lcd.print("Setup Reset");
+    //delay(1000);
+    //clearLine(0);
+    // lcd.setCursor(0, 0);
+    //lcd.print("Ready");
+    //lcd.setCursor(0, 1);
 
-    // stepperY.setSpeed(STEPPER_RPM);
+    stepperY.setSpeed(STEPPER_RPM);
     stepperX.setSpeed(STEPPER_RPM);
 
     // Test stuff, sizes of things
@@ -160,13 +181,13 @@ void loop() {
              currCoord -> yCoord = Serial.parseFloat();
              
             // LCD debug output
-            clearLine(1);
-            lcd.print("+ Parsed ints +");
+            //clearLine(1);
+            // lcd.print("+ Parsed ints +");
             
-            lcd.setCursor(0,1);
-            lcd.print( currCoord -> xCoord);
-            lcd.print(" ");
-            lcd.print( currCoord -> yCoord);
+            // lcd.setCursor(0,1);
+            // lcd.print( currCoord -> xCoord);
+            // lcd.print(" ");
+            // lcd.print( currCoord -> yCoord);
 
 
             currCoord -> next = (struct Node *) malloc (sizeof(struct Node));
@@ -224,8 +245,8 @@ void loop() {
 
     Serial.println("Input 's' to execute the path with steppers, 'p' to print storage through serial,");
     Serial.println(" 'r' go back and listen to serial, 'c' to clear memory and listen to serial.");
-    clearLine(1);
-    lcd.print("Input, See serial");
+    //clearLine(1);
+    // lcd.print("Input, See serial");
 
    /* while(1==1){ // Wait for user input on operatoin to perfrom with data recieved
         if(Serial.available() > 0){
