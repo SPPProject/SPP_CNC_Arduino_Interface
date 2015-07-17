@@ -21,7 +21,7 @@ byte STEPPER_4_Y = 11;
 
 // Stepper Property Definition
 byte STEPS = 200; // 1.8 degrees per step
-byte STEPPER_RPM = 100; // RPM the stepper runs on (150 is about the maximum)
+byte STEPPER_RPM = 50; // RPM the stepper runs on (150 is about the maximum)
 byte UNIT_DISTANCE_X = 10; // Number of steps per one unit distance, X axis
 byte UNIT_DISTANCE_Y = 10; // Number of steps per one unit distance, Y axis
 
@@ -77,17 +77,20 @@ void stepperMoveTo(float posX, float posY){
     int subStepX;
     int subStepY;
     
+    /*
+    Serial.println("");
     Serial.print("MoveX: ");
     Serial.print(displacmentX);
     Serial.print("    MoveY: ");
     Serial.print(displacmentY);
+    Serial.println("");
 
     while(1 == 1){
       if (abs(displacmentX) > abs(displacmentY))
       
     }
-
-    /*
+    */
+    
     // Move X
     Serial.print("MoveX: ");
     Serial.println((posX - stepper_LastX)*UNIT_DISTANCE_X);
@@ -97,7 +100,7 @@ void stepperMoveTo(float posX, float posY){
     Serial.print("MoveY: ");
     Serial.println((posY - stepper_LastY)*UNIT_DISTANCE_Y);
     stepperY.step((posY - stepper_LastY)*UNIT_DISTANCE_Y);
-    */
+    
     
     // Update last position
     stepper_LastX = posX;
@@ -105,6 +108,7 @@ void stepperMoveTo(float posX, float posY){
 
 
     // Will also have to impliment Z actions 
+    Serial.println("");
 
 }
 
@@ -307,7 +311,7 @@ void loop() {
             while (currCoord != NULL){
                 delay(50);
                 Serial.print("CC:");
-                Serial.print((long)currCoord);
+                Serial.println((long)currCoord);
              
                 stepperMoveTo(currCoord->xCoord,currCoord->yCoord);
                 
