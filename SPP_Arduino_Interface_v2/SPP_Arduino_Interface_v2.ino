@@ -21,9 +21,9 @@ byte STEPPER_4_Y = 11;
 
 // Stepper Property Definition
 byte STEPS = 200; // 1.8 degrees per step
-byte STEPPER_RPM = 50; // RPM the stepper runs on (150 is about the maximum)
-byte UNIT_DISTANCE_X = 10; // Number of steps per one unit distance, X axis
-byte UNIT_DISTANCE_Y = 10; // Number of steps per one unit distance, Y axis
+byte STEPPER_RPM = 100; // RPM the stepper runs on (150 is about the maximum)
+byte UNIT_DISTANCE_X = 2; // Number of steps per one unit distance, X axis
+byte UNIT_DISTANCE_Y = 2; // Number of steps per one unit distance, Y axis
 
 Stepper stepperX = Stepper(STEPS, STEPPER_1_X, STEPPER_2_X, STEPPER_3_X, STEPPER_4_X);
 Stepper stepperY = Stepper(STEPS, STEPPER_1_Y, STEPPER_2_Y, STEPPER_3_Y, STEPPER_4_Y);
@@ -74,10 +74,13 @@ void stepperMoveTo(float posX, float posY){
     int displacmentX = ((posX - stepper_LastX)*UNIT_DISTANCE_X);
     int displacmentY = ((posY - stepper_LastY)*UNIT_DISTANCE_Y);
 
-    int subStepX;
-    int subStepY;
+    int subStep;
+
+    int stepRatio;
+
+    char Xdir = displacmentX/abs(displacmentX); // Unit directions
+    char Ydir = displacmentY/abs(displacmentY);
     
-    /*
     Serial.println("");
     Serial.print("MoveX: ");
     Serial.print(displacmentX);
@@ -86,11 +89,58 @@ void stepperMoveTo(float posX, float posY){
     Serial.println("");
 
     while(1 == 1){
-      if (abs(displacmentX) > abs(displacmentY))
+        if (abs(displacmentX) == abs(displacmentY)){
+            // if line is diagonal, save professor cycles by performing diagonal move
+            for(int i = abs(displacmentX); i > 0; i--){
+                // Do diagonal
+                stepperX.step(Xdir);
+                stepperY.step(Ydir);
+            }
+            break;
+        }
+
+        else if (abs(displacmentX) > abs(displacmentY) && abs(displacmentY) > 0 && abs(displacmentX)> 0){
+            // |X/Y| > 1
+            subStep = Xdir*abs(displacmentX)/abs(displacmentY);
+            stepperX.step(subStep);
+            stepperY.step(Ydir);
+
+            displacmentX = displacmentX - subStep;
+            displacmentY = displacmentY - Ydir;
+
+            stepper_LastX += subStep;
+            stepper_LastY += Ydir;
+        }
+
+        else if (abs(displacmentX) < abs(displacmentY) && abs(displacmentY) > 0 && abs(displacmentX)> 0){
+            // |X/Y| < 1
+            subStep = Ydir*abs(displacmentY)/abs(displacmentX);
+            stepperX.step(Xdir);
+            stepperY.step(subStep);
+
+            displacmentY = displacmentY - subStep;
+            displacmentX = displacmentX - Xdir;
+
+            stepper_LastY += subStep;
+            stepper_LastX += Ydir;
+        }
       
+        else if (abs(displacmentX) == 0){
+            stepperY.step(displacmentY);
+            displacmentY = 0;
+            stepper_LastY += displacmentY;
+            break;
+        }
+      
+        else if (abs(displacmentY) == 0){
+            stepperX.step(displacmentX);
+            displacmentX = 0;
+            stepper_LastX += displacmentX;
+            break;
+        }
     }
-    */
     
+    /* OLD MOVE ALG
     // Move X
     Serial.print("MoveX: ");
     Serial.println((posX - stepper_LastX)*UNIT_DISTANCE_X);
@@ -109,6 +159,7 @@ void stepperMoveTo(float posX, float posY){
 
     // Will also have to impliment Z actions 
     Serial.println("");
+    */
 
 }
 
